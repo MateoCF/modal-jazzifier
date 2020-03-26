@@ -95,59 +95,82 @@ router.post('/output', function(req, res, next) {
     possibleKeysAndModes[keySet] = {}
     for(var modeSet in chordNotes[keySet]) {
       possibleKeysAndModes[keySet][modeSet] = {}
+      var characterNote = "";
+      switch (modeSet) {
+        case "ionian":
+          characterNote = Mode.get(modeSet).intervals.map(Note.transposeFrom(keySet))[3]
+        break;
+        case "dorian":
+          characterNote = Mode.get(modeSet).intervals.map(Note.transposeFrom(keySet))[5]
+        break;
+        case "phrygian":
+          characterNote = Mode.get(modeSet).intervals.map(Note.transposeFrom(keySet))[1]
+        break;
+        case "lydian":
+          characterNote = Mode.get(modeSet).intervals.map(Note.transposeFrom(keySet))[3]
+        break;
+        case "mixolydian":
+          characterNote = Mode.get(modeSet).intervals.map(Note.transposeFrom(keySet))[6]
+        break;
+        case "aeolian":
+          characterNote = Mode.get(modeSet).intervals.map(Note.transposeFrom(keySet))[5]
+        break;
+        case "locrian":
+          characterNote = Mode.get(modeSet).intervals.map(Note.transposeFrom(keySet))[4]
+        break;
+      }
       chordNotes[keySet][modeSet].forEach((possibleChord, i) => {
-
             var similarCadentialNoteCount = 0; //max is 3 since the chords are build out of 3 4ths
             var similarTonicNoteCount = 0; //max is 3 since the chords are build out of 3 4ths
 
-            //for comparing tonics
-            quartaltonics.forEach((tonicChord, i) => {
-              if(Interval.distance(possibleChord[0], tonicChord[0]) == "1P") {
-                similarTonicNoteCount++
-              }
-              if(Interval.distance(possibleChord[1], tonicChord[1]) == "1P") {
-                similarTonicNoteCount++
-              }
-              if(Interval.distance(possibleChord[2], tonicChord[2]) == "1P") {
-                similarTonicNoteCount++
-              }
-              if (similarTonicNoteCount == 3) { //if chord is same add to output
-                if(tonicChord == quartaltonic1) {
-                  possibleKeysAndModes[keySet][modeSet]["tonic1"] = tonicChord
+            //for comparing tonics that dont have character note
+            if (!possibleChord.includes(characterNote)) {
+              quartaltonics.forEach((tonicChord, i) => {
+                if(Interval.distance(possibleChord[0], tonicChord[0]) == "1P") {
+                  similarTonicNoteCount++
                 }
-                if(tonicChord == quartaltonic2) {
-                  possibleKeysAndModes[keySet][modeSet]["tonic2"] = tonicChord
+                if(Interval.distance(possibleChord[1], tonicChord[1]) == "1P") {
+                  similarTonicNoteCount++
                 }
-                if(tonicChord == quartaltonic3) {
-                  possibleKeysAndModes[keySet][modeSet]["tonic3"] = tonicChord
+                if(Interval.distance(possibleChord[2], tonicChord[2]) == "1P") {
+                  similarTonicNoteCount++
                 }
-              }
-            });
-              //for comparing cadentials
-              quartalcadentials.forEach((cadentialChord, i) => {
-                if(Interval.distance(possibleChord[0], cadentialChord[0]) == "1P") {
-                  similarCadentialNoteCount++
-                }
-                if(Interval.distance(possibleChord[1], cadentialChord[1]) == "1P") {
-                  similarCadentialNoteCount++
-                }
-                if(Interval.distance(possibleChord[2], cadentialChord[2]) == "1P") {
-                  similarCadentialNoteCount++
-                }
-                if (similarCadentialNoteCount == 3) {
-                  if(cadentialChord == quartalcadential1) {
-                    possibleKeysAndModes[keySet][modeSet]["cadential1"] = cadentialChord
+                if (similarTonicNoteCount == 3) { //if chord is same add to output
+                  if(tonicChord == quartaltonic1) {
+                    possibleKeysAndModes[keySet][modeSet]["tonic1"] = tonicChord
                   }
-                  if(cadentialChord == quartalcadential2) {
-                    possibleKeysAndModes[keySet][modeSet]["cadential2"] = cadentialChord
+                  if(tonicChord == quartaltonic2) {
+                    possibleKeysAndModes[keySet][modeSet]["tonic2"] = tonicChord
                   }
-                  if(cadentialChord == quartalcadential3) {
-                    possibleKeysAndModes[keySet][modeSet]["cadential3"] = cadentialChord
+                  if(tonicChord == quartaltonic3) {
+                    possibleKeysAndModes[keySet][modeSet]["tonic3"] = tonicChord
                   }
                 }
-            });
-
-
+              });
+            }
+              //for comparing cadentials regardless if contains root note
+            quartalcadentials.forEach((cadentialChord, i) => {
+              if(Interval.distance(possibleChord[0], cadentialChord[0]) == "1P") {
+                similarCadentialNoteCount++
+              }
+              if(Interval.distance(possibleChord[1], cadentialChord[1]) == "1P") {
+                similarCadentialNoteCount++
+              }
+              if(Interval.distance(possibleChord[2], cadentialChord[2]) == "1P") {
+                similarCadentialNoteCount++
+              }
+              if (similarCadentialNoteCount == 3) {
+                if(cadentialChord == quartalcadential1) {
+                  possibleKeysAndModes[keySet][modeSet]["cadential1"] = cadentialChord
+                }
+                if(cadentialChord == quartalcadential2) {
+                  possibleKeysAndModes[keySet][modeSet]["cadential2"] = cadentialChord
+                }
+                if(cadentialChord == quartalcadential3) {
+                  possibleKeysAndModes[keySet][modeSet]["cadential3"] = cadentialChord
+                }
+              }
+          });
       });
     }
   }
